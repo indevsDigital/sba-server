@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'rest_framework',
+    'rest_framework_docs',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api'
