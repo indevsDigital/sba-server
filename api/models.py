@@ -8,8 +8,8 @@ def get_UserProfile_avatar_path(self,filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=20,blank=True, null=True)
-    avatar = ResizedImageField(size =[500,500],upload_to=get_UserProfile_avatar_path)
-    national_id = models.CharField(max_length=100)
+    avatar = ResizedImageField(size =[500,500],upload_to=get_UserProfile_avatar_path,blank=True, null=True)
+    national_id = models.CharField(max_length=100,blank=True, null=True)
     def profile_image(self):
         return '<a href="/media/%s"><img style="height:70px;width:70px;" alt="25" src="/media/%s"/></a>' % (self.avatar,self.avatar)
     profile_image.allow_tags = True
