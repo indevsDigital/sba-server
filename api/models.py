@@ -22,12 +22,10 @@ class UserProfile(models.Model):
 
 class Item(models.Model):
     name = models.CharField(max_length=20)
-    
     sale_price = models.DecimalField(max_digits=8, decimal_places=2)
 
-    # @property
-    # def sale_price(self):
-    #     return "Sh :%s" % self.sale_price
+    def get_item_profit(self):
+        return 0.0
 
     def __str__(self):
         return str(self.name)
@@ -36,12 +34,8 @@ class Item(models.Model):
 class Stock(models.Model):
     item =models.ForeignKey(Item)
     number = models.IntegerField()
-
     inital_price = models.DecimalField(max_digits=8, decimal_places=2)
 
-    # @property
-    # def inital_price(self):
-    #     return "Sh :%s" % self.inital_price
-
-
-
+    
+    def get_total_income(self):
+        return 0.0
