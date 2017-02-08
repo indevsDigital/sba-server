@@ -9,7 +9,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display=("name",)
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=('product_name','product_category','unit_price','shiping_price','shiped_on','end_on')
+    list_display=('product_name','get_item_profit','product_category','product_code','unit_price','shiping_price','shiped_on','end_on','total_inital_units','business','available_units','sold_unit')
 
 class BusinessAdmin(admin.ModelAdmin):
     list_display=('name','get_products','county','owner','city','street',)

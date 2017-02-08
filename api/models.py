@@ -24,39 +24,49 @@ class Category(models.Model):
     def __str__(self):
         return str(self.name)
 
-class Product(models.Model):
-    product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
-    product_category = models.ForeignKey(Category)
-    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
-    shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
-    shiped_on = models.DateTimeField()
-    end_on = models.DateTimeField(null=True, blank=True)
-
-    def get_price(self,request):
-        return self.unit_price
-
-    def get_item_profit(self):
-        return 0.0
-
-    def __str__(self):
-        return str(self.product_name)
 
 
 class Business(models.Model):
     name = models.CharField(verbose_name="Business Name",max_length=200)
-    products  = models.ManyToManyField(Product)
     county = models.CharField(max_length=200)
     owner = models.OneToOneField(UserProfile,on_delete=models.CASCADE)
     city = models.CharField(max_length=200)
     street = models.CharField(max_length=200)
 
     def get_products(self):
-        return "\n".join([str(p) for p  in self.products.all()])
+        return "\n".join([str(p) for p  in Product.objects.all().filter(business=self)])
+
+    get_products.short_description = 'Products' 
+    
+    def __str__(self):
+        return str(self.name)
+
+
+class Product(models.Model):
+    product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
+    product_category = models.ForeignKey(Category)
+    product_code =  models.CharField(max_length=25)
+    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
+    shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
+    shiped_on = models.DateTimeField()
+    total_inital_units = models.IntegerField()
+    business = models.ForeignKey(Business)
+    end_on = models.DateTimeField(null=True, blank=True)
+    available_units = models.IntegerField()
+    sold_unit = models.IntegerField(null=True, blank=True)
+
+    def get_price(self,request):
+        return self.unit_price
+
+    def get_item_profit(self):
+        return (((self.unit_price-self.shiping_price)))
+
+    def __str__(self):
+        return str(self.product_name)+ " " +str(self.product_code)
 
 class Sales(models.Model):
     product  = models.ForeignKey(Product)
-    units = models.DecimalField(max_digits=4,decimal_places=4)
+    units = models.DecimalField(max_digits=4,decimal_places=2)
     sold_at = models.DateTimeField()
     business = models.ForeignKey(Business)
-
-
+    
