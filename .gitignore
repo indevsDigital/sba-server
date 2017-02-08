@@ -69,7 +69,7 @@ local_settings.py
 # Flask stuff:
 instance/
 .webassets-cache
-
+db.sqlite
 # Scrapy stuff:
 .scrapy
 

@@ -49,3 +49,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'national_id', instance.national_id)
         instance.save()
         return instance
+class ProductSerializer(serializers.ModelSerializer):
+    pass
+
+class CategorySerializer(serializers.ModelSerializer):
+    pass
+
+class AddressSerializer(serializers.ModelSerializer):
+    pass
