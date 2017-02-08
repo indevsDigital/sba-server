@@ -1,11 +1,12 @@
 from django.shortcuts import render
+import django_filters
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile,Product,Category
 from .serializers import UserSerializer,UserProfileSerializer,ProductSerializer,AddressSerializer,CategorySerializer
 from djoser.views import RegistrationView
 
@@ -13,7 +14,7 @@ from djoser.views import RegistrationView
 def api_root(request, fomart=None):
     """The api root"""
     return Response({
-        
+        'users': reverse('user-list', request=request, format=format),
     })
 class Registration(RegistrationView):
     def perform_create(self,serializer):
@@ -36,19 +37,18 @@ class UserProfileList(generics.CreateAPIView):
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-class ProductList(APIView):
-    def get(self,request,format=None):
-        pass
-    def post(self,request,format=None):
-        pass
 
-class ProductDetail(APIView):
-    def get_object(self,pk):
-        pass
-    def get(self,request,pk,format=None):
-        pass
-    def put(self,request,pk,format=None):
-        pass
-    def delete(self,request,pk,format=None):
-        pass
+class ProductList(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_fields = ('product_category','unit_price','shiping_price','shiped_on')
+    
+
+class CategoryList(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 # Create your views here.

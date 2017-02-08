@@ -44,8 +44,8 @@ class Business(models.Model):
 
 class Product(models.Model):
     product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
-    product_category = models.ForeignKey(Category)
     product_code =  models.CharField(max_length=25)
+    product_category = models.ForeignKey(Category,related_name="category")
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
     shiped_on = models.DateTimeField()
