@@ -17,3 +17,44 @@ class UserProfile(models.Model):
     def __str__(self):
         return str(self.user)
 # Create your models here.
+
+class Category(models.Model):
+    name = models.CharField(max_length=255,verbose_name=("Product Category"))
+
+    def __str__(self):
+        return str(self.name)
+
+class Product(models.Model):
+    product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
+    product_caterory = models.ForeignKey(Category)
+    unit_price = models.DecimalField(max_digits=8, decimal_places=2)
+    shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
+    shiped_on = models.DateTimeField()
+    end_on = models.DateTimeField()
+
+    def get_price(self,request):
+        return self.unit_price
+
+    def get_item_profit(self):
+        return 0.0
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Business(models.Model):
+    name = models.CharField(verbose_name="Business Name",max_length=200)
+    products  = models.ManyToManyField(Product)
+    county = models.CharField(max_length=200)
+    owner = models.OneToOneField(UserProfile,on_delete=models.CASCADE)
+    city = models.CharField(max_length=200)
+    street = models.CharField(max_length=200)
+
+
+class Sales(models.Model):
+    product  = models.ForeignKey(Product)
+    units = models.DecimalField(max_digits=4,decimal_places=4)
+    sold_at = models.DateTimeField()
+    business = models.ForeignKey(Business)
+
+
