@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'corsheaders',
+    'djoser',
     'rest_framework',
     'rest_framework_docs',
     'django.contrib.messages',
@@ -144,6 +146,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
+}
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10
 }
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':
