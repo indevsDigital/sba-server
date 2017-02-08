@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile,Product,Category,Business,Sales
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -50,10 +50,35 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 class ProductSerializer(serializers.ModelSerializer):
-    pass
+    product_category = serializers.HyperlinkedRelatedField(queryset=Category.objects.all(),view_name="category-detail")
+    
+    class Meta:
+        model = Product
+        fields = ('id','product_name','product_category','unit_price','shiping_price','shiped_on','end_on')
+        
+    def create(self,validated_data):
+        return Product.objects.create(**validated_data)
 
-class CategorySerializer(serializers.ModelSerializer):
-    pass
+    def update(self,instance,validated_data):
+        instance.product_name = validated_data.get('product_name', instance.product_name)
+        instance.product_category = validated_data.get('product_category', instance.product_category)
+        instance.unit_price = validated_data.get('unit_price', instance.unit_price)
+        instance.shiping_price = validated_data.get('shiping_price', instance.shiping_price)
+        instance.shiped_on = validated_data.get('shiped_on', instance.shiped_on)
+        instance.end_on = validated_data.get('end_on', instance.end_on)
+        instance.save()
+        return instance
+
+class CategorySerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id','name')
+
+    def create(self,validated_data):
+        return Category.objects.create(**validated_data)
+
+    def update(self,instance,validated_data):
+        instance.name = validated_data.get('name', instance.name)
 
 class AddressSerializer(serializers.ModelSerializer):
     pass
