@@ -19,13 +19,13 @@ class UserProfile(models.Model):
 # Create your models here.
 
 class Category(models.Model):
-    name = models.CharField(max_length=255,verbose_name=_("Product Category"))
+    name = models.CharField(max_length=255,verbose_name=("Product Category"))
 
     def __str__(self):
         return str(self.name)
 
 class Product(models.Model):
-    product_name = models.CharField(max_length=255, verbose_name=_("Product Name"))
+    product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
     product_caterory = models.ForeignKey(Category)
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
@@ -43,7 +43,7 @@ class Product(models.Model):
 
 
 class Business(models.Model):
-    name = models.CharField(help="Business Name",max_length=200)
+    name = models.CharField(verbose_name="Business Name",max_length=200)
     products  = models.ManyToManyField(Product)
     county = models.CharField(max_length=200)
     owner = models.OneToOneField(UserProfile,on_delete=models.CASCADE)
