@@ -26,11 +26,11 @@ class Category(models.Model):
 
 class Product(models.Model):
     product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
-    product_caterory = models.ForeignKey(Category)
+    product_category = models.ForeignKey(Category)
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     shiping_price = models.DecimalField(max_digits=8,decimal_places=2)
     shiped_on = models.DateTimeField()
-    end_on = models.DateTimeField()
+    end_on = models.DateTimeField(null=True, blank=True)
 
     def get_price(self,request):
         return self.unit_price
@@ -39,7 +39,7 @@ class Product(models.Model):
         return 0.0
 
     def __str__(self):
-        return str(self.name)
+        return str(self.product_name)
 
 
 class Business(models.Model):
@@ -50,6 +50,8 @@ class Business(models.Model):
     city = models.CharField(max_length=200)
     street = models.CharField(max_length=200)
 
+    def get_products(self):
+        return "\n".join([str(p) for p  in self.products.all()])
 
 class Sales(models.Model):
     product  = models.ForeignKey(Product)

@@ -1,19 +1,24 @@
 from django.contrib import admin
-# from .models import UserProfile,Item ,Stock
-
-# class UserProfileAdmin(admin.ModelAdmin):
-#     list_display = ('user','phone_number','profile_image','national_id')
+from .models import UserProfile,Category,Product,Business,Sales
 
 
-# class ItemAdmin(admin.ModelAdmin):
-#     list_display = ('name','sale_price')
-#     fields = ('name','sale_price')
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user','phone_number','profile_image','national_id')
 
-# class StockAdmin(admin.ModelAdmin):
-#     list_display =('item','number','inital_price')
+class CategoryAdmin(admin.ModelAdmin):
+    list_display=("name",)
 
+class ProductAdmin(admin.ModelAdmin):
+    list_display=('product_name','product_category','unit_price','shiping_price','shiped_on','end_on')
 
-# admin.site.register(UserProfile, UserProfileAdmin)
-# admin.site.register(Item, ItemAdmin)
-# admin.site.register(Stock,StockAdmin)
-# Register your models here.
+class BusinessAdmin(admin.ModelAdmin):
+    list_display=('name','get_products','county','owner','city','street',)
+
+class SalesAdmin(admin.ModelAdmin):
+    list_display=('product','units','sold_at','business')
+
+admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(Category,CategoryAdmin)
+admin.site.register(Product,ProductAdmin)
+admin.site.register(Business,BusinessAdmin)
+admin.site.register(Sales,SalesAdmin)
