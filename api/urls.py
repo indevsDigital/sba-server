@@ -5,7 +5,7 @@ from rest_framework_jwt.views import obtain_jwt_token
 from . import views
 router = routers.DefaultRouter()
 urlpatterns = format_suffix_patterns([
-    url(r'^$', views.api_root,name='api'),
+    url(r'^$', views.ApiRootView.as_view(),name='api'),
     url(r'^auth/register', views.Registration.as_view(), name='register'),
     url(r'^api-token-auth/', obtain_jwt_token),
     url(r'^users/$', views.UserList.as_view(),name="user-list"),
