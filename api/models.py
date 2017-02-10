@@ -53,7 +53,7 @@ class Product(models.Model):
     business = models.ForeignKey(Business)
     end_on = models.DateTimeField(null=True, blank=True)
     available_units = models.IntegerField()
-    sold_unit = models.IntegerField(null=True, blank=True)
+    sold_unit = models.IntegerField(default=0)
 
     def get_price(self,request):
         return self.unit_price
