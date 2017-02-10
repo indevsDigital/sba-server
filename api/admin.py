@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile,Category,Product,Business,Sales
+from .models import UserProfile,Category,Product,Business,Sale
 
 
 class UserProfileAdmin(admin.ModelAdmin):
@@ -14,11 +14,11 @@ class ProductAdmin(admin.ModelAdmin):
 class BusinessAdmin(admin.ModelAdmin):
     list_display=('name','get_products','county','owner','city','street',)
 
-class SalesAdmin(admin.ModelAdmin):
+class SaleAdmin(admin.ModelAdmin):
     list_display=('product','units','sold_at','business')
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Category,CategoryAdmin)
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Business,BusinessAdmin)
-admin.site.register(Sales,SalesAdmin)
+admin.site.register(Sale,SaleAdmin)

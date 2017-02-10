@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile,Product,Category,Business,Sales
+from .models import UserProfile,Product,Category,Business,Sale
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -51,20 +51,25 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return instance
 class ProductSerializer(serializers.ModelSerializer):
     product_category = serializers.HyperlinkedRelatedField(queryset=Category.objects.all(),view_name="category-detail")
+    business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
     
     class Meta:
         model = Product
-        fields = ('id','product_name','product_category','unit_price','shiping_price','shiped_on','end_on')
+        fields = ('id','product_name','product_code','product_category','unit_price','shiping_price','shiped_on','total_inital_units','business','end_on','available_units','sold_unit')
         
     def create(self,validated_data):
         return Product.objects.create(**validated_data)
 
     def update(self,instance,validated_data):
         instance.product_name = validated_data.get('product_name', instance.product_name)
+        instance.product_code = validated_data.get('product_code', instance.product_code)
         instance.product_category = validated_data.get('product_category', instance.product_category)
         instance.unit_price = validated_data.get('unit_price', instance.unit_price)
         instance.shiping_price = validated_data.get('shiping_price', instance.shiping_price)
         instance.shiped_on = validated_data.get('shiped_on', instance.shiped_on)
+        instance.total_inital_units = validated_data.get('total_inital_units', instance.total_inital_units)
+        instance.business = validated_data.get('business', instance.business)
+        instance.product_name = validated_data.get('product_name', instance.product_name)        
         instance.end_on = validated_data.get('end_on', instance.end_on)
         instance.save()
         return instance
@@ -79,6 +84,44 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self,instance,validated_data):
         instance.name = validated_data.get('name', instance.name)
+        instance.save()
+        return instance
 
-class AddressSerializer(serializers.ModelSerializer):
-    pass
+
+
+class BusinessSerializer(serializers.ModelSerializer):
+    owner = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-profile')
+    class Meta:
+        model = Business
+        fields = ('id','name','county','owner','city','street')
+    def create(self,validated_data):
+        return Business.objects.create(**validated_data)
+
+    def update(self,instance,validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.county = validated_data.get('county', instance.county)
+        instance.owner = validated_data.get('owner', instance.owner)
+        instance.city = validated_data.get('city', instance.city)
+        instance.street = validated_data.get('street', instance.street)
+        instance.save()
+        return instance
+        
+class SalesSerializer(serializers.ModelSerializer):
+    product = serializers.HyperlinkedRelatedField(queryset=Product.objects.all(),view_name='product-detail')
+    business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
+
+    class Meta:
+        model = Sale
+        fields = ('id','product','units','sold_at','business')
+
+    def create(self,validated_data):
+        return Sale.objects.all()
+        
+    def update(self,instance,validated_data):
+        instance.product = validated_data.get('product', instance.product)
+        instance.units = validated_data.get('units', instance.units)
+        instance.sold_at = validated_data.get('sold_at', instance.sold_at)
+        instance.business = validated_data.get('business', instance.business)
+        instance.save()
+        return instance
+        
