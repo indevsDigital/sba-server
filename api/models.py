@@ -64,7 +64,7 @@ class Product(models.Model):
     def __str__(self):
         return str(self.product_name)+ " " +str(self.product_code)
 
-class Sales(models.Model):
+class Sale(models.Model):
     product  = models.ForeignKey(Product)
     units = models.DecimalField(max_digits=4,decimal_places=2)
     sold_at = models.DateTimeField()
