@@ -22,7 +22,7 @@ class Registration(RegistrationView):
         customer = UserProfile(user=user)
         customer.save()
         super()
-        
+
 class UserList(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -43,7 +43,7 @@ class ProductList(generics.ListCreateAPIView):
     serializer_class = ProductSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('product_category','unit_price','shiping_price','shiped_on')
-    
+
 
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
