@@ -149,8 +149,15 @@ class DamagedItems(object):
         self.product_id = product_id
 
 class DamagedItemsSerializer(serializers.Serializer):
+
+
     units = serializers.IntegerField()
     product_id = serializers.IntegerField()
 
     def create(self,validated_data):
         return DamagedItems(**validated_data)
+
+class ItemsBoughtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id','product_name','unit_price')

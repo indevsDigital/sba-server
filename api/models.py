@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django_resized import ResizedImageField
-
+from django.utils import timezone
 def get_UserProfile_avatar_path(self,filename):
     return "files/users/profiles/%s/%s"%(str(self.user.username),filename)
 
@@ -47,10 +47,11 @@ class Business(models.Model):
 class Product(models.Model):
     product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
     product_code =  models.CharField(max_length=25)
+    description = models.TextField(default='')
     product_category = models.ForeignKey(Category,related_name="category")
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
     shiping_price = models.DecimalField(max_digits=8,decimal_places=2)#TODO: Remove it has no use
-    purchase_date = models.DateTimeField()
+    purchase_date = models.DateField(default=timezone.now)
     total_inital_units = models.PositiveIntegerField()
     business = models.ForeignKey(Business)
     end_on = models.DateTimeField(null=True, blank=True)

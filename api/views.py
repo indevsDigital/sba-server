@@ -1,5 +1,6 @@
 from django.shortcuts import render,get_object_or_404
 import django_filters
+from django.db.models import Sum
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,7 +9,7 @@ from django.contrib.auth.models import User
 from .models import UserProfile,Product,Category,Business,Receipt
 from .serializers import UserSerializer,UserProfileSerializer,ProductSerializer,\
                     CategorySerializer,BusinessSerializer,ReceiptSerializer,\
-                    SellerSerializer,DamagedItemsSerializer
+                    SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer
 from djoser.views import RegistrationView
 from django.utils.six import BytesIO
 from django.utils import timezone
@@ -124,7 +125,4 @@ class DamagedItems(APIView):
             product.available_units -= data.units
             product.save()
             return Response('%d units have been recorded damaged'%data.units,status=status.HTTP_200_OK)
-        return Response('data is not valid',status=status.HTTP_400_BAD_REQUEST)
-
-#TODO create view to list all items bought
-#
+        return Response('data is not valid',status=status.HTTP_400_BAD_REQUEST)    
