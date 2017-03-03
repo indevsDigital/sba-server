@@ -55,7 +55,7 @@ class ProductSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ('id','product_name','product_code','product_category','unit_price','shiping_price','purchase_date','total_inital_units','business','end_on','expires_on','available_units','sold_unit','damaged_units')
+        fields = ('id','product_name','product_code','description','product_category','unit_price','shiping_price','purchase_date','total_inital_units','business','end_on','expires_on','available_units','sold_unit','damaged_units')
         
     def create(self,validated_data):
         return Product.objects.create(**validated_data)
@@ -72,10 +72,14 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.product_name = validated_data.get('product_name', instance.product_name)        
         instance.end_on = validated_data.get('end_on', instance.end_on)
         instance.expires_on = validated_data.get('expires_on', instance.expires_on)
-        instance.damaged_units = validated_data.get('damaged_units', instance.damaged_units)                        
+        instance.damaged_units = validated_data.get('damaged_units', instance.damaged_units)
+        instance.description = validated_data.get('description', instance.description)                                                        
         instance.save()
         return instance
-
+class ProductSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id','product_name','description','unit_price')
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category

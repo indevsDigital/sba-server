@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from .models import UserProfile,Product,Category,Business,Receipt
 from .serializers import UserSerializer,UserProfileSerializer,ProductSerializer,\
                     CategorySerializer,BusinessSerializer,ReceiptSerializer,\
-                    SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer
+                    SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer,ProductSimpleSerializer
 from djoser.views import RegistrationView
 from django.utils.six import BytesIO
 from django.utils import timezone
@@ -51,7 +51,10 @@ class UserProfileList(generics.CreateAPIView):
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
-
+class SimpleProductList(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSimpleSerializer
+    
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
