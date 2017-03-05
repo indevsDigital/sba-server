@@ -17,9 +17,13 @@ from django.conf.urls import url,include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.schemas import get_schema_view
+
+schema_view = get_schema_view(title='SBA API')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/',include('api.urls')),
     url(r'^api-docs/', include('rest_framework_docs.urls')),
+    url(r'^schema/$', schema_view)
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

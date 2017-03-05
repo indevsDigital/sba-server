@@ -16,7 +16,9 @@ from django.utils import timezone
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from .random_string import generate_a_receipt_number
+from rest_framework.permissions import IsAuthenticated
 class ApiRootView(APIView):
+    permission_classes = (IsAuthenticated,)
     def get(self,request):
         return Response({
             'register': reverse('register', request=request),
@@ -27,7 +29,9 @@ class ApiRootView(APIView):
             'products': reverse('product-list', request=request),
             'businesses': reverse('business-list', request=request),
             'receipts': reverse('receipts-list', request=request),
-            'sell': reverse('sell', request=request)
+            'sell': reverse('sell', request=request),
+            'simple product list': reverse('simple-product-list', request=request),
+            'damaged units': reverse('damaged', request=request)
              })
 
 class Registration(RegistrationView):
@@ -38,24 +42,30 @@ class Registration(RegistrationView):
         super()
 
 class UserList(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 class UserProfileList(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 class SimpleProductList(generics.ListAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
     
 class ProductList(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
@@ -64,37 +74,45 @@ class ProductList(generics.ListCreateAPIView):
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 class CategoryList(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 class BusinessList(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('name','county','owner','city','street')
 
 class BusinessDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
 class ReceiptsList(generics.ListCreateAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('product','units','sold_at','business')
 
 class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
 
 class SellItem(APIView):
+    permission_classes = (IsAuthenticated,)
     """sell items in stock"""
     def post(self,request):
         data = JSONParser().parse(request)
@@ -117,6 +135,7 @@ class SellItem(APIView):
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
 
 class DamagedItems(APIView):
+    permission_classes = (IsAuthenticated,)
     """list items damaged in stock"""
     def post(self,request):
         data = JSONParser().parse(request)
