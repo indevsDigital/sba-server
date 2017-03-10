@@ -21,6 +21,7 @@ urlpatterns = format_suffix_patterns([
     url(r'^receipts/(?P<pk>\d+)/$', views.ReceiptDetail.as_view(),name="receipt-detail"),
     url(r'^sell/$',views.SellItem.as_view(),name="sell"),
     url(r'^damaged-items/$',views.DamagedItems.as_view(),name='damaged'),
+    url(r'^accounts/bought/$', views.AccountItemsBought.as_view(),name='bought')
 
 
 ])

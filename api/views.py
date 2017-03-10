@@ -16,7 +16,8 @@ from django.utils import timezone
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from .random_string import generate_a_receipt_number
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,IsAdminUser
+from django_filters import rest_framework as filters
 class ApiRootView(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request):
@@ -60,7 +61,7 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 class SimpleProductList(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
     
@@ -148,3 +149,23 @@ class DamagedItems(APIView):
             product.save()
             return Response('%d units have been recorded damaged'%data.units,status=status.HTTP_200_OK)
         return Response('data is not valid',status=status.HTTP_400_BAD_REQUEST)    
+
+class AccountItemsBoughtFilter(filters.FilterSet):
+    date_range = django_filters.DateFromToRangeFilter(name='purchase_date')
+    unit_price_range = django_filters.NumericRangeFilter(name='unit_price')
+    class Meta:
+        model = Product
+        fields = ['product_category','unit_price','purchase_date','unit_price_range']
+
+class AccountItemsBought(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSimpleSerializer
+    permission_classes = (IsAdminUser,)
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_class = AccountItemsBoughtFilter
+
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        total = queryset.aggregate(sum=Sum('unit_price'))
+        seriaizer = ProductSimpleSerializer(queryset,many=True)
+        return Response({'data': seriaizer.data,'total_price':total})
