@@ -70,6 +70,7 @@ class Product(models.Model):
         return str(self.product_name)+ " " +str(self.product_code)
 
 class Receipt(models.Model):
+    unit_price = models.DecimalField(max_digits=8, decimal_places=2)    
     product  = models.ForeignKey(Product)
     units = models.DecimalField(max_digits=4,decimal_places=2)
     sold_at = models.DateTimeField()

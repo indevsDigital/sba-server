@@ -33,7 +33,8 @@ class ApiRootView(APIView):
             'sell': reverse('sell', request=request),
             'simple product list': reverse('simple-product-list', request=request),
             'damaged units': reverse('damaged', request=request),
-            'damaged units account': reverse('damaged-account', request=request)
+            'damaged units account': reverse('damaged-account', request=request),
+            'sold units account': reverse('sold-account', request=request)            
              })
 
 class Registration(RegistrationView):
@@ -114,7 +115,7 @@ class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReceiptSerializer
 
 class SellItem(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes =(IsAuthenticated,)
     """sell items in stock"""
     def post(self,request):
         data = JSONParser().parse(request)
@@ -135,7 +136,6 @@ class SellItem(APIView):
                receipt = Receipt.objects.create(product=newproduct,units=data.number_of_units,sold_at=timezone.now(),business=business,receipt_number=receipt_no,total_amount=total)
                return Response(ReceiptSerializer(receipt,context={'request':request}).data,status=status.HTTP_200_OK)
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
-
 class DamagedItems(APIView):
     permission_classes = (IsAuthenticated,)
     """list items damaged in stock"""
@@ -180,3 +180,18 @@ class DamagedItemsAccount(generics.ListAPIView):
         total = queryset.aggregate(sum=Sum(F('damaged_units')*F('unit_price'), output_field=FloatField()))
         serializer = ProductSimpleSerializer(queryset,many=True)
         return Response({'data':serializer.data,'total_damaged_units':total})
+
+class SoldItemsAccount(generics.ListAPIView):
+    queryset = Product.objects.filter(sold_unit__gte=1)
+    serializer_class = ProductSimpleSerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        total = queryset.aggregate(sum=Sum(F('sold_unit')*F('unit_price'), output_field=FloatField()))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'data':serializer.data,'total sum of sold items':total})
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'data':serializer.data,'total sum of sold items':total})

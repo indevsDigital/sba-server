@@ -72,7 +72,6 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.product_name = validated_data.get('product_name', instance.product_name)        
         instance.end_on = validated_data.get('end_on', instance.end_on)
         instance.expires_on = validated_data.get('expires_on', instance.expires_on)
-        instance.damaged_units = validated_data.get('damaged_units', instance.damaged_units)
         instance.description = validated_data.get('description', instance.description)                                                        
         instance.save()
         return instance

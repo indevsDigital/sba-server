@@ -22,7 +22,8 @@ urlpatterns = format_suffix_patterns([
     url(r'^sell/$',views.SellItem.as_view(),name="sell"),
     url(r'^damaged-items/$',views.DamagedItems.as_view(),name='damaged'),
     url(r'^accounts/bought/$', views.AccountItemsBought.as_view(),name='bought'),
-    url(r'^accounts/damaged/$', views.DamagedItemsAccount.as_view(),name='damaged-account')
+    url(r'^accounts/damaged/$', views.DamagedItemsAccount.as_view(),name='damaged-account'),
+    url(r'^accounts/sold/$', views.SoldItemsAccount.as_view(),name='sold-account')    
 ])
 urlpatterns += [
     url(r'^api-auth/', include('rest_framework.urls',
