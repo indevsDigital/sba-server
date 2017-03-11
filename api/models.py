@@ -46,7 +46,7 @@ class Business(models.Model):
 
 class Product(models.Model):
     product_name = models.CharField(max_length=255, verbose_name=("Product Name"))
-    product_code =  models.CharField(max_length=25)
+    product_code =  models.CharField(max_length=25,unique=True)
     description = models.TextField(default='')
     product_category = models.ForeignKey(Category,related_name="category")
     unit_price = models.DecimalField(max_digits=8, decimal_places=2)
@@ -62,14 +62,10 @@ class Product(models.Model):
     def get_price(self,request):
         return self.unit_price
 
-    def get_item_profit(self):
-        return (((self.unit_price-self.shiping_price)))
-
     def __str__(self):
         return str(self.product_name)+ " " +str(self.product_code)
 
 class Receipt(models.Model):
-    receipt_items = models.ForeignKey('ReceiptItems')
     sold_at = models.DateTimeField(default=timezone.now)
     business = models.ForeignKey(Business)
     receipt_number = models.CharField(max_length=150)
@@ -79,6 +75,7 @@ class Receipt(models.Model):
         return str(self.receipt_number)
     
 class ReceiptItems(models.Model):
+    receipt = models.ForeignKey(Receipt)
     product = models.ForeignKey(Product)
     selling_price_per_unit = models.DecimalField(max_digits=8, decimal_places=2,default=0)
     units = models.DecimalField(max_digits=4,decimal_places=2)
