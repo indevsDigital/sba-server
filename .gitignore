@@ -95,7 +95,7 @@ celerybeat-schedule
 .venv/
 venv/
 ENV/
-
+/media/*
 # Spyder project settings
 .spyderproject
 

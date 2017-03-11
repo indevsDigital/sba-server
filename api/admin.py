@@ -15,7 +15,7 @@ class BusinessAdmin(admin.ModelAdmin):
     list_display=('name','get_products','county','owner','city','street',)
 
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display=('receipt_items','total_amount','sold_at','business')
+    list_display=('sold_at','business','receipt_number','served_by')
 
 class ReceiptItemsAdmin(admin.ModelAdmin):
     list_display = ('receipt','product','selling_price_per_unit','units','items_return')
