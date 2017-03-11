@@ -136,11 +136,20 @@ class SellItem(APIView):
                return Response(ReceiptSerializer(receipt,context={'request':request}).data,status=status.HTTP_200_OK)
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
 
-class DamagedItems(generics.CreateAPIView):
+class DamagedItems(APIView):
     permission_classes = (IsAuthenticated,)
-    """Update damaged items items damaged in stock"""
-    queryset = Product.objects.all()
-    serializer_class = DamagedItemsSerializer
+    """list items damaged in stock"""
+    def post(self,request):
+        data = JSONParser().parse(request)
+        serializer = DamagedItemsSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            data = serializer.save()
+            product = get_object_or_404(Product,pk=data.product_id)
+            product.damaged_units += data.units
+            product.available_units -= data.units
+            product.save()
+            return Response('%d units have been recorded damaged'%data.units,status=status.HTTP_200_OK)
+        return Response('data is not valid',status=status.HTTP_400_BAD_REQUEST)
 
 class AccountItemsBoughtFilter(filters.FilterSet):
     date_range = django_filters.DateFromToRangeFilter(name='purchase_date')
