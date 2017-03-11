@@ -77,7 +77,7 @@ class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('product_category','unit_price','shiping_price','purchase_date')
+    filter_fields = ('product_category','unit_price','purchase_date')
 
 
 
@@ -112,7 +112,7 @@ class ReceiptsList(generics.ListCreateAPIView):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('product','units','sold_at','business')
+    filter_fields = ('sold_at','business')
 
 class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsAuthenticated,)
@@ -171,7 +171,7 @@ class AccountItemsBought(generics.ListAPIView):
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        total = queryset.aggregate(sum=Sum('unit_price'))
+        total = queryset.aggregate(sum=Sum(F('unit_price')*F('total_inital_units'), output_field=FloatField()))
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

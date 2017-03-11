@@ -55,7 +55,7 @@ class ProductSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Product
-        fields = ('id','product_name','product_code','description','product_category','unit_price','shiping_price','purchase_date','total_inital_units','business','end_on','expires_on','available_units','sold_unit','damaged_units')
+        fields = ('id','product_name','product_code','description','product_category','unit_price','purchase_date','total_inital_units','business','end_on','expires_on','available_units','sold_unit','damaged_units')
         
     def create(self,validated_data):
         return Product.objects.create(**validated_data)
@@ -65,7 +65,6 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.product_code = validated_data.get('product_code', instance.product_code)
         instance.product_category = validated_data.get('product_category', instance.product_category)
         instance.unit_price = validated_data.get('unit_price', instance.unit_price)
-        instance.shiping_price = validated_data.get('shiping_price', instance.shiping_price)
         instance.purchase_date = validated_data.get('purchase_date', instance.purchase_date)
         instance.total_inital_units = validated_data.get('total_inital_units', instance.total_inital_units)
         instance.business = validated_data.get('business', instance.business)
@@ -112,23 +111,18 @@ class BusinessSerializer(serializers.ModelSerializer):
         return instance
         
 class ReceiptSerializer(serializers.ModelSerializer):
-    product = serializers.HyperlinkedRelatedField(queryset=Product.objects.all(),view_name='product-detail')
     business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
-
     class Meta:
         model = Receipt
-        fields = ('id','product','units','sold_at','business','receipt_number','total_amount')
+        fields = ('id','sold_at','business','receipt_number')
 
     def create(self,validated_data):
         return Receipt.objects.all()
         
     def update(self,instance,validated_data):
-        instance.product = validated_data.get('product', instance.product)
-        instance.units = validated_data.get('units', instance.units)
         instance.sold_at = validated_data.get('sold_at', instance.sold_at)
         instance.business = validated_data.get('business', instance.business)
-        instance.receipt_number = validated_data.get('receipt_number', instance.receipt_number)
-        instance.total_amount = validated_data.get('total_amount', instance.total_amount)     
+        instance.receipt_number = validated_data.get('receipt_number', instance.receipt_number)     
         instance.save()
         return instance
 
