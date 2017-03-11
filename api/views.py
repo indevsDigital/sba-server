@@ -33,6 +33,7 @@ class ApiRootView(APIView):
             'sell': reverse('sell', request=request),
             'simple product list': reverse('simple-product-list', request=request),
             'damaged units': reverse('damaged', request=request),
+            'bought units account': reverse('bought', request=request),            
             'damaged units account': reverse('damaged-account', request=request),
             'sold units account': reverse('sold-account', request=request)            
              })
@@ -168,6 +169,10 @@ class AccountItemsBought(generics.ListAPIView):
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         total = queryset.aggregate(sum=Sum('unit_price'))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'data':serializer.data,'total sum of bought units':total})
         seriaizer = ProductSimpleSerializer(queryset,many=True)
         return Response({'data': seriaizer.data,'total_price':total})
 
@@ -178,6 +183,10 @@ class DamagedItemsAccount(generics.ListAPIView):
     def list(self,request):
         queryset = self.get_queryset()
         total = queryset.aggregate(sum=Sum(F('damaged_units')*F('unit_price'), output_field=FloatField()))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'data':serializer.data,'total sum of damaged units':total})
         serializer = ProductSimpleSerializer(queryset,many=True)
         return Response({'data':serializer.data,'total_damaged_units':total})
 
@@ -191,7 +200,7 @@ class SoldItemsAccount(generics.ListAPIView):
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response({'data':serializer.data,'total sum of sold items':total})
+            return self.get_paginated_response({'data':serializer.data,'total sum of sold units':total})
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data,'total sum of sold items':total})
