@@ -1,6 +1,6 @@
 from django.shortcuts import render,get_object_or_404
 import django_filters
-from django.db.models import Sum
+from django.db.models import Sum,F,FloatField
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -32,7 +32,8 @@ class ApiRootView(APIView):
             'receipts': reverse('receipts-list', request=request),
             'sell': reverse('sell', request=request),
             'simple product list': reverse('simple-product-list', request=request),
-            'damaged units': reverse('damaged', request=request)
+            'damaged units': reverse('damaged', request=request),
+            'damaged units account': reverse('damaged-account', request=request)
              })
 
 class Registration(RegistrationView):
@@ -135,20 +136,11 @@ class SellItem(APIView):
                return Response(ReceiptSerializer(receipt,context={'request':request}).data,status=status.HTTP_200_OK)
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
 
-class DamagedItems(APIView):
+class DamagedItems(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
-    """list items damaged in stock"""
-    def post(self,request):
-        data = JSONParser().parse(request)
-        serializer = DamagedItemsSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            data = serializer.save()
-            product = get_object_or_404(Product,pk=data.product_id)
-            product.damaged_units += data.units
-            product.available_units -= data.units
-            product.save()
-            return Response('%d units have been recorded damaged'%data.units,status=status.HTTP_200_OK)
-        return Response('data is not valid',status=status.HTTP_400_BAD_REQUEST)    
+    """Update damaged items items damaged in stock"""
+    queryset = Product.objects.all()
+    serializer_class = DamagedItemsSerializer
 
 class AccountItemsBoughtFilter(filters.FilterSet):
     date_range = django_filters.DateFromToRangeFilter(name='purchase_date')
@@ -169,3 +161,13 @@ class AccountItemsBought(generics.ListAPIView):
         total = queryset.aggregate(sum=Sum('unit_price'))
         seriaizer = ProductSimpleSerializer(queryset,many=True)
         return Response({'data': seriaizer.data,'total_price':total})
+
+class DamagedItemsAccount(generics.ListAPIView):
+    queryset=Product.objects.filter(damaged_units__gte=1)
+    serializer_class = ProductSimpleSerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        total = queryset.aggregate(sum=Sum(F('damaged_units')*F('unit_price'), output_field=FloatField()))
+        serializer = ProductSimpleSerializer(queryset,many=True)
+        return Response({'data':serializer.data,'total_damaged_units':total})
