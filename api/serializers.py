@@ -133,15 +133,17 @@ class ReceiptSerializer(serializers.ModelSerializer):
         return instance
 
 class Seller(object):
-    def __init__(self,business_id,product_id,number_of_units):
+    def __init__(self,business_id,product_id,number_of_units,selling_price):
         self.business_id = business_id
         self.product_id = product_id
         self.number_of_units = number_of_units
+        self.selling_price = selling_price
 
 class SellerSerializer(serializers.Serializer):
     business_id = serializers.IntegerField()
     product_id = serializers.IntegerField()
     number_of_units = serializers.IntegerField()
+    selling_price = serializers.DecimalField(max_digits=8,decimal_places=2)
 
     def create(self,validated_data):
         return Seller(**validated_data)

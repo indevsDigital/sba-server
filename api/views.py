@@ -37,7 +37,9 @@ class ApiRootView(APIView):
             'bought units account': reverse('bought', request=request),            
             'damaged units account': reverse('damaged-account', request=request),
             'sold units account': reverse('sold-account', request=request),
-            'remaining units account': reverse('remaining-account', request=request),                                    
+            'remaining units account': reverse('remaining-account', request=request),
+            'Profits and Losses account': reverse('profit-losses-account', request=request),                              
+                                          
              })
 
 class Registration(RegistrationView):
@@ -118,7 +120,6 @@ class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReceiptSerializer
 
 class SellItem(APIView):
-    permission_classes =(IsAuthenticated,)
     """sell items in stock"""
     def post(self,request):
         data = JSONParser().parse(request)
@@ -131,7 +132,7 @@ class SellItem(APIView):
             else:
                product.available_units -= data.number_of_units
                product.sold_unit += data.number_of_units
-               total = product.unit_price * data.number_of_units
+               total = data.selling_price * data.number_of_units
                product.save()
                newproduct = get_object_or_404(Product,pk=data.product_id,business__id=data.business_id)
                business = get_object_or_404(Business,pk=data.business_id)
@@ -221,3 +222,6 @@ class RemainingItemsAccount(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data,'total sum of remaining items':total})
+
+class ProfitsLossesAccounts(generics.ListAPIView):
+    pass
