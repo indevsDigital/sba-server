@@ -15,7 +15,7 @@ class BusinessAdmin(admin.ModelAdmin):
     list_display=('name','get_products','county','owner','city','street',)
 
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display=('receipt_number','product','units','total_amount','sold_at','business')
+    list_display=('receipt_number','product','selling_price','units','total_amount','sold_at','business')
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Category,CategoryAdmin)

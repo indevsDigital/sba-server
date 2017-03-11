@@ -19,6 +19,7 @@ from .random_string import generate_a_receipt_number
 from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,IsAdminUser
 from django_filters import rest_framework as filters
 class ApiRootView(APIView):
+    """The root of the api describe all the urls for the resources"""
     permission_classes = (IsAuthenticated,)
     def get(self,request):
         return Response({
@@ -35,7 +36,8 @@ class ApiRootView(APIView):
             'damaged units': reverse('damaged', request=request),
             'bought units account': reverse('bought', request=request),            
             'damaged units account': reverse('damaged-account', request=request),
-            'sold units account': reverse('sold-account', request=request)            
+            'sold units account': reverse('sold-account', request=request),
+            'remaining units account': reverse('remaining-account', request=request),                                    
              })
 
 class Registration(RegistrationView):
@@ -204,3 +206,18 @@ class SoldItemsAccount(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data':serializer.data,'total sum of sold items':total})
+
+class RemainingItemsAccount(generics.ListAPIView):
+    queryset = Product.objects.filter(available_units__gte=1)
+    serializer_class = ProductSimpleSerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        total = queryset.aggregate(sum=Sum(F('available_units')*F('unit_price'), output_field=FloatField()))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'data':serializer.data,'total sum of remaining units':total})
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'data':serializer.data,'total sum of remaining items':total})
