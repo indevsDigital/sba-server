@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile,Product,Category,Business,Receipt
+from .models import UserProfile,Product,Category,Business,Receipt,ReceiptItems
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -112,14 +112,21 @@ class BusinessSerializer(serializers.ModelSerializer):
         
 class ReceiptSerializer(serializers.ModelSerializer):
     business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
-    served_by = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-profile')
+    served_by = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-profile')
     class Meta:
         model = Receipt
         fields = ('id','sold_at','business','receipt_number','total_selling_price','served_by')
 
     def create(self,validated_data):
         return Receipt.objects.all()
-
+class ReceiptItemsSerializer(serializers.ModelSerializer):
+    receipt = serializers.HyperlinkedRelatedField(queryset=Receipt.objects.all(),view_name='receipt-detail')
+    product = serializers.HyperlinkedRelatedField(queryset=Product.objects.all(),view_name='product-detail')
+    
+    class Meta:
+        model = ReceiptItems
+        fields = ('receipt','product','selling_price_per_unit','units','items_return')
+        
 class Seller(object):
     def __init__(self,business_id,product):
         self.business_id = business_id

@@ -9,18 +9,18 @@ from django.contrib.auth.models import User
 from .models import UserProfile,Product,Category,Business,Receipt,ReceiptItems
 from .serializers import UserSerializer,UserProfileSerializer,ProductSerializer,\
                     CategorySerializer,BusinessSerializer,ReceiptSerializer,\
-                    SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer,ProductSimpleSerializer
+                    SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer,ProductSimpleSerializer,ReceiptItemsSerializer
 from djoser.views import RegistrationView
 from django.utils.six import BytesIO
 from django.utils import timezone
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from .random_string import generate_a_receipt_number
-from rest_framework.permissions import IsAuthenticated,IsAuthenticatedOrReadOnly,IsAdminUser
+from rest_framework.permissions import IsAdminUser
 from django_filters import rest_framework as filters
+
 class ApiRootView(APIView):
     """The root of the api describe all the urls for the resources"""
-    permission_classes = (IsAuthenticated,)
     def get(self,request):
         return Response({
             'register': reverse('register', request=request),
@@ -50,30 +50,24 @@ class Registration(RegistrationView):
         super()
 
 class UserList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 class UserProfileList(generics.CreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 class SimpleProductList(generics.ListAPIView):
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
     
 class ProductList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
@@ -82,45 +76,37 @@ class ProductList(generics.ListCreateAPIView):
 
 
 class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 class CategoryList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 class BusinessList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('name','county','owner','city','street')
 
 class BusinessDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
 class ReceiptsList(generics.ListCreateAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('sold_at','business')
 
 class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = (IsAuthenticated,)
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
 
 class SellItem(APIView):
-    permission_classes = (IsAuthenticated,)
     """sell items in stock"""
     def post(self,request):
         serializer = SellerSerializer(data=request.data)
@@ -129,32 +115,30 @@ class SellItem(APIView):
             total_selling_price = 0
             total_buying_price = 0           
             business = get_object_or_404(Business,pk=data.business_id)
-            receipt_no = generate_a_receipt_number(business.name,total)
-            receipt = Receipt(business=business,receipt_number=receipt_no,served_by=request.user)            
+            receipt_no = generate_a_receipt_number(business.name,total_selling_price)
+            receipt = Receipt.objects.create(business=business,receipt_number=receipt_no,served_by=request.user)            
             for data in data.product:
-                product = get_object_or_404(Product,pk=data['pk'])
-                if product.available_units < data['number_of_units']:
+                product = get_object_or_404(Product,pk=int(data['pk']))
+                if product.available_units < int(data['number_of_units']):
                     return Response('Number of items remaining are not enough',status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    product.available_units -= data['number_of_units']
-                    product.sold_unit += data['number_of_units']
-                    total_selling_price += (data['selling_price'] * data['number_of_units'])
-                    total_buying_price += product.unit_price * data['nuber_of_units']
+                    product.available_units -= int(data['number_of_units'])
+                    product.sold_unit += int(data['number_of_units'])
+                    total_selling_price += (int(data['selling_price']) * int(data['number_of_units']))
+                    total_buying_price += product.unit_price * int(data['number_of_units'])
                     items_return = total_selling_price - total_buying_price
                     product.save()
-                    newproduct = get_object_or_404(Product,pk=data.product_id,business__id=data.business_id)
-                    ReceiptItems.objects.create(receipt=receipt,product=newproduct,selling_price_per_unit=data['selling_price'],
-                                            units=data['number_of_units'],items_return=items_return)
+                    newproduct = get_object_or_404(Product,pk=int(data['pk']))
+                    ReceiptItems.objects.create(receipt=receipt,product=newproduct,selling_price_per_unit=int(data['selling_price']),
+                                            units=int(data['number_of_units']),items_return=items_return)
             receipt.total_selling_price = total_selling_price
-            saved_receipt = receipt.save()   
-            return Response(ReceiptSerializer(saved_receipt,context={'request':request}).data,status=status.HTTP_200_OK)
+            receipt.save()   
+            return Response(ReceiptSerializer(receipt,context={'request':request}).data,status=status.HTTP_200_OK)
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
 class DamagedItems(APIView):
-    permission_classes = (IsAuthenticated,)
     """list items damaged in stock"""
     def post(self,request):
-        data = JSONParser().parse(request)
-        serializer = DamagedItemsSerializer(data=data)
+        serializer = DamagedItemsSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
             product = get_object_or_404(Product,pk=data.product_id)
@@ -233,4 +217,16 @@ class RemainingItemsAccount(generics.ListAPIView):
         return Response({'data':serializer.data,'total sum of remaining items':total})
 
 class ProfitsLossesAccounts(generics.ListAPIView):
-    pass
+    queryset = ReceiptItems.objects.all()
+    serializer_class = ReceiptItemsSerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        total = queryset.aggregate(sum=Sum('items_return'))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'data':serializer.data,'total sum returns':total})
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'data':serializer.data,'total sum returns':total})

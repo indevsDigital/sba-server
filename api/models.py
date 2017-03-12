@@ -69,7 +69,7 @@ class Receipt(models.Model):
     sold_at = models.DateTimeField(default=timezone.now)
     business = models.ForeignKey(Business)
     receipt_number = models.CharField(max_length=150)
-    served_by = models.ForeignKey(UserProfile)
+    served_by = models.ForeignKey(User)
     total_selling_price = models.DecimalField(max_digits=12,decimal_places=2,default=0)
     def __str__(self):
         return str(self.receipt_number)
