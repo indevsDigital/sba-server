@@ -122,7 +122,7 @@ class SellItem(APIView):
             for data in data.product:
                 product = get_object_or_404(Product,pk=int(data['pk']))
                 if product.available_units < int(data['number_of_units']):
-                    raise ValidationError('no of units remaining not enough for ' + str(product.product_name))
+                    raise ValidationError('Requested units are not enough for  ' + str(product.product_name))
                 else:
                     product.available_units -= int(data['number_of_units'])
                     product.sold_unit += int(data['number_of_units'])
