@@ -18,7 +18,8 @@ from rest_framework import status
 from .random_string import generate_a_receipt_number
 from rest_framework.permissions import IsAdminUser
 from django_filters import rest_framework as filters
-
+from django.db import transaction
+from rest_framework.exceptions import ValidationError
 class ApiRootView(APIView):
     """The root of the api describe all the urls for the resources"""
     def get(self,request):
@@ -108,6 +109,7 @@ class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
 
 class SellItem(APIView):
     """sell items in stock"""
+    @transaction.atomic
     def post(self,request):
         serializer = SellerSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -120,7 +122,7 @@ class SellItem(APIView):
             for data in data.product:
                 product = get_object_or_404(Product,pk=int(data['pk']))
                 if product.available_units < int(data['number_of_units']):
-                    return Response('Number of items remaining are not enough',status=status.HTTP_400_BAD_REQUEST)
+                    raise ValidationError('no of units remaining not enough for ' + str(product.product_name))
                 else:
                     product.available_units -= int(data['number_of_units'])
                     product.sold_unit += int(data['number_of_units'])
