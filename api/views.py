@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from django.contrib.auth.models import User
-from .models import UserProfile,Product,Category,Business,Receipt
+from .models import UserProfile,Product,Category,Business,Receipt,ReceiptItems
 from .serializers import UserSerializer,UserProfileSerializer,ProductSerializer,\
                     CategorySerializer,BusinessSerializer,ReceiptSerializer,\
                     SellerSerializer,DamagedItemsSerializer,ItemsBoughtSerializer,ProductSimpleSerializer
@@ -120,25 +120,34 @@ class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReceiptSerializer
 
 class SellItem(APIView):
+    permission_classes = (IsAuthenticated,)
     """sell items in stock"""
     def post(self,request):
-        data = JSONParser().parse(request)
-        serializer = SellerSerializer(data=data)
+        serializer = SellerSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
-            product = get_object_or_404(Product,pk=data.product_id,business__id=data.business_id)
-            if product.available_units < data.number_of_units:
-                return Response('Number of items remaining are not enough',status=status.HTTP_400_BAD_REQUEST)
-            else:
-               product.available_units -= data.number_of_units
-               product.sold_unit += data.number_of_units
-               total = data.selling_price * data.number_of_units
-               product.save()
-               newproduct = get_object_or_404(Product,pk=data.product_id,business__id=data.business_id)
-               business = get_object_or_404(Business,pk=data.business_id)
-               receipt_no = generate_a_receipt_number(business.name,total)
-               receipt = Receipt.objects.create(product=newproduct,units=data.number_of_units,sold_at=timezone.now(),business=business,receipt_number=receipt_no,total_amount=total)
-               return Response(ReceiptSerializer(receipt,context={'request':request}).data,status=status.HTTP_200_OK)
+            total_selling_price = 0
+            total_buying_price = 0           
+            business = get_object_or_404(Business,pk=data.business_id)
+            receipt_no = generate_a_receipt_number(business.name,total)
+            receipt = Receipt(business=business,receipt_number=receipt_no,served_by=request.user)            
+            for data in data.product:
+                product = get_object_or_404(Product,pk=data['pk'])
+                if product.available_units < data['number_of_units']:
+                    return Response('Number of items remaining are not enough',status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    product.available_units -= data['number_of_units']
+                    product.sold_unit += data['number_of_units']
+                    total_selling_price += (data['selling_price'] * data['number_of_units'])
+                    total_buying_price += product.unit_price * data['nuber_of_units']
+                    items_return = total_selling_price - total_buying_price
+                    product.save()
+                    newproduct = get_object_or_404(Product,pk=data.product_id,business__id=data.business_id)
+                    ReceiptItems.objects.create(receipt=receipt,product=newproduct,selling_price_per_unit=data['selling_price'],
+                                            units=data['number_of_units'],items_return=items_return)
+            receipt.total_selling_price = total_selling_price
+            saved_receipt = receipt.save()   
+            return Response(ReceiptSerializer(saved_receipt,context={'request':request}).data,status=status.HTTP_200_OK)
         return Response('data  is not valid',status=status.HTTP_400_BAD_REQUEST)
 class DamagedItems(APIView):
     permission_classes = (IsAuthenticated,)

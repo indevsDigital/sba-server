@@ -112,32 +112,28 @@ class BusinessSerializer(serializers.ModelSerializer):
         
 class ReceiptSerializer(serializers.ModelSerializer):
     business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
+    served_by = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-profile')
     class Meta:
         model = Receipt
-        fields = ('id','sold_at','business','receipt_number')
+        fields = ('id','sold_at','business','receipt_number','total_selling_price','served_by')
 
     def create(self,validated_data):
         return Receipt.objects.all()
-        
-    def update(self,instance,validated_data):
-        instance.sold_at = validated_data.get('sold_at', instance.sold_at)
-        instance.business = validated_data.get('business', instance.business)
-        instance.receipt_number = validated_data.get('receipt_number', instance.receipt_number)     
-        instance.save()
-        return instance
 
 class Seller(object):
-    def __init__(self,business_id,product_id,number_of_units,selling_price):
+    def __init__(self,business_id,product):
         self.business_id = business_id
-        self.product_id = product_id
-        self.number_of_units = number_of_units
-        self.selling_price = selling_price
+        self.product = product
+        
+class DocumentListField(serializers.DictField):
+    child = serializers.CharField()
+
+class StringListField(serializers.ListField):
+    child = DocumentListField()
 
 class SellerSerializer(serializers.Serializer):
     business_id = serializers.IntegerField()
-    product_id = serializers.IntegerField()
-    number_of_units = serializers.IntegerField()
-    selling_price = serializers.DecimalField(max_digits=8,decimal_places=2)
+    product = StringListField()
 
     def create(self,validated_data):
         return Seller(**validated_data)
