@@ -77,7 +77,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id','product_name','product_code','description','unit_price')
+        fields = ('id','product_name','product_code','available_units','unit_price')
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Category
