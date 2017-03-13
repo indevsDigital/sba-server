@@ -67,6 +67,11 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 class SimpleProductList(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
     
 class ProductList(generics.ListCreateAPIView):
     queryset = Product.objects.all()
