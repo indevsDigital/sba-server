@@ -88,6 +88,11 @@ class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
 class CategoryList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+    def list(self,request):
+        queryset = self.get_queryset()
+        serializer_class = self.get_serializer(queryset,many=True)
+        return Response(serializer_class.data)
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
