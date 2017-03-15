@@ -48,6 +48,10 @@ class Registration(RegistrationView):
         customer = UserProfile(user=user)
         customer.save()
         super()
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 class UserDetails(APIView):
     def get(self,request):
         user = get_object_or_404(User,username=request.user)
@@ -109,6 +113,11 @@ class ReceiptsList(generics.ListCreateAPIView):
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_fields = ('sold_at','business')
 
+    def list(self,request):
+        user = request.user
+        queryset = Receipt.objects.filter(business=user.userprofile.business)
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
 class ReceiptDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Receipt.objects.all()
     serializer_class = ReceiptSerializer
@@ -126,7 +135,7 @@ class SellItem(APIView):
             receipt_no = generate_a_receipt_number(business.name,total_selling_price)
             receipt = Receipt.objects.create(business=business,receipt_number=receipt_no,served_by=request.user)            
             for data in data.product:
-                product = get_object_or_404(Product,pk=int(data['pk']))
+                product = get_object_or_404(Product,pk=int(data['pk']),business__id=data.business_id)
                 if product.available_units < int(data['number_of_units']):
                     raise ValidationError('Requested units are not enough for  ' + str(product.product_name))
                 else:
@@ -146,10 +155,11 @@ class SellItem(APIView):
 class DamagedItems(APIView):
     """list items damaged in stock"""
     def post(self,request):
+        user = request.user        
         serializer = DamagedItemsSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             data = serializer.save()
-            product = get_object_or_404(Product,pk=data.product_id)
+            product = get_object_or_404(Product,pk=data.product_id,business__id=user.userprofile.business.id)
             product.damaged_units += data.units
             product.available_units -= data.units
             product.save()

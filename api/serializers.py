@@ -95,7 +95,7 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BusinessSerializer(serializers.ModelSerializer):
-    owner = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='details')
+    owner = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-detail')
     class Meta:
         model = Business
         fields = ('id','name','county','owner','city','street')
@@ -113,7 +113,7 @@ class BusinessSerializer(serializers.ModelSerializer):
         
 class ReceiptSerializer(serializers.ModelSerializer):
     business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')
-    served_by = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-profile')
+    served_by = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-detail')
     class Meta:
         model = Receipt
         fields = ('id','sold_at','business','receipt_number','total_selling_price','served_by')
