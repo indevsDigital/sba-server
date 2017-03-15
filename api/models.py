@@ -22,6 +22,7 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'Categories'
     name = models.CharField(max_length=255,verbose_name=("Product Category"))
+    business = models.ForeignKey('Business')
 
     def __str__(self):
         return str(self.name)

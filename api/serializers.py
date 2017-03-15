@@ -79,9 +79,10 @@ class ProductSimpleSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id','product_name','product_code','available_units','unit_price')
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
+    business = serializers.HyperlinkedRelatedField(queryset=Business.objects.all(),view_name='business-detail')    
     class Meta:
         model = Category
-        fields = ('id','name')
+        fields = ('id','name','business')
 
     def create(self,validated_data):
         return Category.objects.create(**validated_data)

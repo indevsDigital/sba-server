@@ -26,8 +26,6 @@ class ApiRootView(APIView):
         return Response({
             'register': reverse('register', request=request),
             'obtain token': reverse('token-obtain',request=request),
-            'users': reverse('user-list',request=request),
-            'user profiles': reverse('user-profile-list',request=request),
             'categories': reverse('category-list', request=request),
             'products': reverse('product-list', request=request),
             'businesses': reverse('business-list', request=request),
@@ -39,7 +37,8 @@ class ApiRootView(APIView):
             'damaged units account': reverse('damaged-account', request=request),
             'sold units account': reverse('sold-account', request=request),
             'remaining units account': reverse('remaining-account', request=request),
-            'Profits and Losses account': reverse('profit-losses-account', request=request),                              
+            'Profits and Losses account': reverse('profit-losses-account', request=request),
+            'User details for logged in user': reverse('details', request=request)                         
                                           
              })
 
@@ -49,27 +48,26 @@ class Registration(RegistrationView):
         customer = UserProfile(user=user)
         customer.save()
         super()
-
-class UserList(generics.ListCreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-class UserProfileList(generics.CreateAPIView):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
-
-class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+class UserDetails(APIView):
+    def get(self,request):
+        user = get_object_or_404(User,username=request.user)
+        profile = user.userprofile
+        business = user.userprofile.business
+        user_data = UserSerializer(user).data
+        profile_data = UserProfileSerializer(profile,context={'request': request}).data
+        business_data = BusinessSerializer(business,context={'request': request}).data
+        return Response({
+            'User': user_data,
+            'profile': profile_data,
+            'business': business_data
+        })
 class SimpleProductList(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user
+        queryset = Product.objects.filter(business=user.userprofile.business)
         serializer = self.get_serializer(queryset,many=True)
         return Response(serializer.data)
     
