@@ -64,18 +64,17 @@ class UserDetails(APIView):
 class SimpleProductList(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSimpleSerializer
-
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_fields = ('product_category','unit_price','purchase_date')
     def list(self,request):
         user = request.user
         queryset = Product.objects.filter(business=user.userprofile.business)
         serializer = self.get_serializer(queryset,many=True)
         return Response(serializer.data)
     
-class ProductList(generics.ListCreateAPIView):
+class ProductList(generics.CreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('product_category','unit_price','purchase_date')
 
 
 
@@ -88,18 +87,17 @@ class CategoryList(generics.ListCreateAPIView):
     serializer_class = CategorySerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user
+        queryset = Category.objects.filter(business=user.userprofile.business)
         serializer_class = self.get_serializer(queryset,many=True)
         return Response(serializer_class.data)
 class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class BusinessList(generics.ListCreateAPIView):
+class BusinessList(generics.CreateAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_fields = ('name','county','owner','city','street')
 
 class BusinessDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Business.objects.all()

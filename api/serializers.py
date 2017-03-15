@@ -95,7 +95,7 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
 
 class BusinessSerializer(serializers.ModelSerializer):
-    owner = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='user-profile')
+    owner = serializers.HyperlinkedRelatedField(queryset=UserProfile.objects.all(),view_name='details')
     class Meta:
         model = Business
         fields = ('id','name','county','owner','city','street')
