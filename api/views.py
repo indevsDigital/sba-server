@@ -181,7 +181,9 @@ class AccountItemsBought(generics.ListAPIView):
     filter_class = AccountItemsBoughtFilter
 
     def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+        user = request.user
+        objects = Product.objects.filter(business=user.userprofile.business)
+        queryset = self.filter_queryset(objects)
         total = queryset.aggregate(sum=Sum(F('unit_price')*F('total_inital_units'), output_field=FloatField()))
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -195,7 +197,8 @@ class DamagedItemsAccount(generics.ListAPIView):
     serializer_class = ProductSimpleSerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user
+        queryset = Product.objects.filter(business=user.userprofile.business)
         total = queryset.aggregate(sum=Sum(F('damaged_units')*F('unit_price'), output_field=FloatField()))
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -209,7 +212,8 @@ class SoldItemsAccount(generics.ListAPIView):
     serializer_class = ProductSimpleSerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user        
+        queryset = Product.objects.filter(business=user.userprofile.business)
         total = queryset.aggregate(sum=Sum(F('sold_unit')*F('unit_price'), output_field=FloatField()))
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -224,7 +228,8 @@ class RemainingItemsAccount(generics.ListAPIView):
     serializer_class = ProductSimpleSerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user  
+        queryset = Product.objects.filter(business=user.userprofile.business)
         total = queryset.aggregate(sum=Sum(F('available_units')*F('unit_price'), output_field=FloatField()))
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -239,7 +244,10 @@ class ProfitsLossesAccounts(generics.ListAPIView):
     serializer_class = ReceiptItemsSerializer
 
     def list(self,request):
-        queryset = self.get_queryset()
+        user = request.user
+        business = user.userprofile.business
+        receipt = Receipt.objects.filter(business=business)
+        queryset = ReceiptItems.objects.filter(receipt=receipt)
         total = queryset.aggregate(sum=Sum('items_return'))
         page = self.paginate_queryset(queryset)
         if page is not None:

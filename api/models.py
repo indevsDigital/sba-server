@@ -68,7 +68,7 @@ class Product(models.Model):
 
 class Receipt(models.Model):
     sold_at = models.DateTimeField(default=timezone.now)
-    business = models.ForeignKey(Business)
+    business = models.ForeignKey(Business,related_name='receipt')
     receipt_number = models.CharField(max_length=150)
     served_by = models.ForeignKey(UserProfile)
     total_selling_price = models.DecimalField(max_digits=12,decimal_places=2,default=0)
