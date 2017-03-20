@@ -56,14 +56,11 @@ class UserDetails(APIView):
     def get(self,request):
         user = get_object_or_404(User,username=request.user)
         profile = user.userprofile
-        business = user.userprofile.business
         user_data = UserSerializer(user).data
         profile_data = UserProfileSerializer(profile,context={'request': request}).data
-        business_data = BusinessSerializer(business,context={'request': request}).data
         return Response({
             'User': user_data,
-            'profile': profile_data,
-            'business': business_data
+            'profile': profile_data
         })
 class SimpleProductList(generics.ListAPIView):
     queryset = Product.objects.all()
@@ -99,9 +96,16 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-class BusinessList(generics.CreateAPIView):
+class BusinessList(generics.ListCreateAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
+
+    def list(self,request):
+        user = request.user
+        profile = user.userprofile
+        queryset = Business.objects.filter(owner=profile)
+        serializer = self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
 
 class BusinessDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Business.objects.all()
